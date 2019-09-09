@@ -1,0 +1,4 @@
+*
+!.gitignore
+!crypto.py
+!run.sh

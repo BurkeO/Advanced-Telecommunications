@@ -1,0 +1,15 @@
+b'GET http://www.irishrail.ie/ HTTP/1.1\r\n
+Host: www.irishrail.ie\r\n
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:65.0) Gecko/20100101 Firefox/65.0\r\n
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\n
+Accept-Language: en-US,en;q=0.5\r\n
+Accept-Encoding: gzip, deflate\r\n
+Referer: https://www.google.com/\r\n
+Connection: keep-alive\r\n
+Cookie: nmstat=1485016309084; __ar_v4=S3ZYPNT5UFBGHP42GIBGQA%3A20170120%3A2%7CMPDQJK5WUFGVLEW4EQNBUV%3A20170120%3A2%7CW5WAIOJYQBFQNMMCKYIG36%3A20170120%3A2; _ga=GA1.2.36033894.1525281241; HFS_from=Coolmine; HFS_to=Sandymount; _gid=GA1.2.1483631043.1549727756; cookieStatus=1; JSESSIONID=E4FCB537661FCB8DC50939C59B518FDE\r\n
+Upgrade-Insecure-Requests: 1\r\n
+If-Modified-Since: Sun, 10 Feb 2019 13:16:27 GMT\r\n
+If-None-Match: W/"77292-1549804587788"\r\n
+Cache-Control: max-age=0\r\n
+DNT: 1\r\n
+\r\n'

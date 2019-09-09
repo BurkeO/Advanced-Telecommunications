@@ -1,0 +1,10 @@
+*
+!.gitignore
+!Report.pdf
+!Report.tex
+!/*
+*.png
+*jpg
+*.aux
+*.log
+*.gz

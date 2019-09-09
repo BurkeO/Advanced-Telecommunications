@@ -1,0 +1,148 @@
+\documentclass{report}
+
+\usepackage{graphicx}
+\usepackage{listings}
+
+\usepackage{pdfpages} 
+
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{color} %red, green, blue, yellow, cyan, magenta, black, white
+\definecolor{mygreen}{RGB}{28,172,0} % color values Red, Green, Blue
+\definecolor{mylilas}{RGB}{170,55,241}
+
+
+\title{\textbf{Advanced Telecommunications - Securing the cloud}\\Owen Burke, 15316452}
+\begin{document}
+
+    \lstset{language=Matlab,%
+    %basicstyle=\color{red},
+    breaklines=true,%
+    morekeywords={matlab2tikz},
+    keywordstyle=\color{blue},%
+    morekeywords=[2]{1}, keywordstyle=[2]{\color{black}},
+    identifierstyle=\color{black},%
+    stringstyle=\color{mylilas},
+    commentstyle=\color{mygreen},%
+    showstringspaces=false,%without this there will be a symbol in the places where there is a space
+    numbers=left,%
+    numberstyle={\tiny \color{black}},% size of the numbers
+    numbersep=9pt, % this defines how far the numbers are from the text
+    emph=[1]{for,end,break},emphstyle=[1]\color{red}, %some words to emphasise
+    %emph=[2]{word1,word2}, emphstyle=[2]{style},    
+    }
+
+    \maketitle
+    \section*{\hfil High-level description of the protocol design and implementation \hfil}
+    \textbf{\large**See images below for proof of work**}\\\\
+    The aim of this project is to develop a secure cloud storage application for Dropbox, Box, Google Drive, Office365etc. For example, your application will secure all files that are uploaded to the cloud, such that only people that are part of your “Secure Cloud Storage Group” will be able to decrypt your uploaded files. To all other users the files will be encrypted.\\\\
+    You are required to design and implement a suitable key management system for your application that will allow you to share files securely, and add or remove users from your group. You are free to implement your application for a desktop or mobile platform and make use of any open source cryptographic libraries.\\\\
+
+    \textbf{High-level description :}\\\\
+    The first step was to establish a way for a single user to encrypt and decrypt their own files. This was done using RSA and AES. The AES symmetric key would be used to encrypt and decrypt all files. (See the encryptFile and decryptFile functions).\\
+    This was relatively simple. The symmetric key would be encrypted with the user's public key and when the symmetric key was needed, it would be decrypted with the user's private key. The choice was made to encrypt the symmetric key for each user because the symmetric key would be shared (across dropbox in this case) and to have the symmetric key unencrypted in public view would be a security hole.\\
+     So, in this system, each user has an encrypted version of the symmetric key ready for them to access. The user pulls it down and decrypts it with their private rsa key and goes about using it. The person who added that user will take the symmetric key for themselves, decrypt it and then encrypt it with the new user's public key. (each user's public key will also be made available to all users, as they are needed if they want to encrpyt the symmetric key for somebody as described above.)\\\\
+    
+    Firstly, when the program is started, the user is prompted for their dropbox access token (in order to access their account). They are also asked for their name. They are then asked for the name of the shared project. For this, the relevant sub-folders are made (original files, encrypted files, decrypted files, etc). This allows users to have multiple shared projects/groups by providing a different shared project name with many different users as each project has an individual members list.\\
+    If the user does not currently have any public keys on their dropbox, they are assumed to be making a new shared project (as you can see around line 170). They make a RSA key pair for themselves and encrypt a 16 byte symmetric key (see the genSymKey and generateRSA\_pairFiles functions) and upload these to dropbox.\\
+    They are then prompted for user input. They can encrypt a file (see encryptFile), decrypt (see decryptFile), add a user, remove a user, encrypt a symmetric key for somebody, or quit the program.\\
+    Encrypting a file is done as described above. They take their private key. Use this to decrypt their version of the encrypted symmetric key and then use this symmetric key to encrypt the file and upload it to dropbox.\\
+    Decrypting the file is a similar process in reverse. They take their private key, decrypt the symmetric key for them and then use this key to decrypt the file.\\\\
+    To add a user, they simply provide a username and this is added to a shared members file (listing the members of the group). When the program is started, if the user is not initially making a project, the members file is checked. If they are not a member, they are told this and the program exits. If they are a member, but don't have any keys, then they make themselves an RSA key pair and share the public key (the new user must do this on their own system themselves rather than the person that added them, due to security issues regarding the sharing of private keys). They are then told to wait for a symmetric key to be encrypted for them. If they already have all their keys, they are told this and prompted for input.\\
+    For removing a user, they provided username is removed from the members file and when they aforementioned user tries to use them system, the program closes as they are not on the list anymore. When the user is removed from the list, all the files on the system are decrypted and re-encrypted with a new symmetric key. All the users that are still in the group will also receive new encrypted symmetric keys (to decrypt old and new files, while the removed user can no longer decrypt any files on the system. This re-encryption is all done in the removeUser function).\\
+    The user can also encrypt a symmetric key for a recently added user. This is done by taking their own version of the encrpyted symmetric key and decrpyting it. They then take the new user's public key and encrpyt the symmetric key with it and push it to the dropbox, so that the new user can encrypt and decrypt files like anybody else.\\\\
+    
+    
+    \textbf{Code : }\\
+    \lstinputlisting[language=Python]{crypto.py}
+    
+    \begin{figure}[h!]
+    	\includegraphics[width=\linewidth]{InitialCreate.jpg}
+    	\caption{First user - initial project}
+    \end{figure}
+    
+    \begin{figure}[h!]
+    	\includegraphics[width=\linewidth]{Encrypt_a_file.jpg}
+    	\caption{Encrypt a file}
+    \end{figure}
+    
+    \begin{figure}[h!]
+    	\includegraphics[width=\linewidth]{After_encrypt_file.PNG}
+    	\caption{After an encryption}
+    \end{figure}
+
+	\begin{figure}[h!]
+		\includegraphics[width=\linewidth]{encrypted_file.PNG}
+		\caption{An encrypted file}
+	\end{figure}
+    
+    \begin{figure}[h!]
+    	\includegraphics[width=\linewidth]{user_not_member.jpg}
+    	\caption{When a user is not a member}
+    \end{figure}
+
+	\begin{figure}[h!]
+		\includegraphics[width=\linewidth]{added_a_user.jpg}
+		\caption{When a user is added}
+	\end{figure}
+
+	\begin{figure}[h!]
+		\includegraphics[width=\linewidth]{new_user_makes_rsa_keys.jpg}
+		\caption{When a user has been added, they make their RSA keys}
+	\end{figure}
+
+ 	\begin{figure}[h!]
+ 		\includegraphics[width=\linewidth]{making_sym_key_for_user.jpg}
+ 		\caption{Encrypting a symmetric key for a new user}
+	\end{figure}  
+
+	\begin{figure}[h!]
+		\includegraphics[width=\linewidth]{new_user_has_been_added.jpg}
+		\caption{A new user has been added and their keys made}
+	\end{figure} 
+
+ 	\begin{figure}[h!]
+		\includegraphics[width=\linewidth]{decrypt_file_1.jpg}
+		\caption{Decrypting a file from another user}
+	\end{figure} 
+
+	\begin{figure}[h!]
+		\includegraphics[width=\linewidth]{decrypt_file_2.PNG}
+		\caption{The decrypted file from another user}
+	\end{figure} 
+
+ 	\begin{figure}[h!]
+		\includegraphics[width=\linewidth]{removing a user.jpg}
+		\caption{Removing a user from the group}
+	\end{figure}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
